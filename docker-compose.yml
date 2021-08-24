@@ -1,0 +1,39 @@
+version: "3.7"
+services:
+  app:
+    build:
+      context: .docker/app
+    volumes:
+      - ./.docker/app/wait-for-db.php:/var/www/scripts/wait-for-db.php
+      - ./volumes/app:/var/www/html
+      - ~/.composer:/root/.composer/
+      - ~/.npm:/root/.npm/
+      - ./.env:/var/www/.env
+    environment:
+      - DB_ADAPTER
+      - DB_NAME
+      - DB_HOST
+      - DB_USER
+      - DB_PASSWD
+      - DATABASE_URL
+      - VERSION
+      - REPOSITORY
+      - XDEBUG_CONFIG
+  nginx:
+    build: .docker/nginx
+    restart: unless-stopped
+    volumes:
+      - ./volumes/app:/var/www/html:ro
+    ports:
+      - 80:80
+  mysql:
+    image: mariadb
+    ports:
+      - 3303:3306
+    volumes:
+      # - ./.docker/mysql/conf:/etc/mysql/conf.d
+      - ./volumes/mysql/dump:/docker-entrypoint-initdb.d
+      - ./volumes/mysql/data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE
