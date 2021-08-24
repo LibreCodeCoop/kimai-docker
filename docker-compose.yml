@@ -18,12 +18,16 @@ services:
       - DATABASE_URL
       - VERSION
       - REPOSITORY
+      - ADMIN_USERNAME
+      - ADMIN_PASSWORD
+      - ADMIN_EMAIL
       - XDEBUG_CONFIG
   nginx:
-    build: .docker/nginx
+    build:
+      context: .docker/nginx
     restart: unless-stopped
     volumes:
-      - ./volumes/app:/var/www/html:ro
+      - ./volumes/app:/app:ro
     ports:
       - 80:80
   mysql:
