@@ -33,7 +33,7 @@ services:
   mysql:
     image: mariadb
     ports:
-      - 3303:3306
+      - 3306:3306
     volumes:
       # - ./.docker/mysql/conf:/etc/mysql/conf.d
       - ./volumes/mysql/dump:/docker-entrypoint-initdb.d
