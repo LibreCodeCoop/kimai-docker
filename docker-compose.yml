@@ -9,6 +9,7 @@ services:
       - ~/.composer:/root/.composer/
       - ~/.npm:/root/.npm/
       - ./.env:/var/www/.env
+    restart: unless-stopped
     environment:
       - DB_ADAPTER
       - DB_NAME
