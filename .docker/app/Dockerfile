@@ -38,7 +38,7 @@ RUN apt-get install -y \
 RUN docker-php-ext-install intl
 
 # Install xdebug
-RUN pecl install xdebug-3.0.4 \
+RUN pecl install xdebug-3.2.0 \
     && docker-php-ext-enable xdebug
 
 # Install zip
