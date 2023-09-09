@@ -1,6 +1,6 @@
 # Kimai development
 
-Development environment for [Kimai](https://github.com/kevinpapst/kimai2)
+Development environment for [Kimai](https://github.com/kimai/kimai)
 
 ## Setup
 
