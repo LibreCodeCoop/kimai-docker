@@ -8,6 +8,8 @@ services:
       - ./volumes/php:/var/www/html
       - ~/.composer:/root/.composer/
     environment:
+      - HOST_UID=${HOST_UID:-1000}
+      - HOST_GID=${HOST_GID:-1000}
       - DB_ADAPTER=${DB_ADAPTER:-mysql}
       - DB_NAME=${DB_NAME:-kimai}
       - DB_HOST=${DB_HOST:-mysql}
