@@ -31,7 +31,7 @@ services:
     volumes:
       - ./volumes/php:/var/www/html:ro
     ports:
-      - 8082:80
+      - 80:80
   mysql:
     image: mariadb
     restart: unless-stopped
