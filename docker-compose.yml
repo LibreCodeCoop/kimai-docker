@@ -1,46 +1,45 @@
-version: "3.7"
 services:
-  app:
+  php:
     build:
-      context: .docker/app
-    volumes:
-      - ./.docker/app/wait-for-db.php:/var/www/scripts/wait-for-db.php
-      - ./volumes/app:/var/www/html
-      - ~/.composer:/root/.composer/
-      - ~/.npm:/root/.npm/
-      - ./.env:/var/www/.env
+      context: .docker/php
     restart: unless-stopped
+    volumes:
+      - ./.docker/php/wait-for-db.php:/var/www/scripts/wait-for-db.php
+      - ./volumes/php:/var/www/html
+      - ~/.composer:/root/.composer/
     environment:
-      - DB_ADAPTER
-      - DB_NAME
-      - DB_HOST
-      - DB_USER
-      - DB_PASSWD
-      - DATABASE_URL
-      - VERSION
-      - REPOSITORY
-      - ADMIN_USERNAME
-      - ADMIN_PASSWORD
-      - ADMIN_EMAIL
-      - XDEBUG_CONFIG
+      - DB_ADAPTER=${DB_ADAPTER:-mysql}
+      - DB_NAME=${DB_NAME:-kimai}
+      - DB_HOST=${DB_HOST:-mysql}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWD=${DB_PASSWD:-root}
+      - DATABASE_URL=${DATABASE_URL:-mysql://root:root@mysql:3306/kimai}
+      - VERSION=${VERSION:-main}
+      - REPOSITORY=${REPOSITORY:-https://github.com/kimai/kimai}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      # Minimum length: 8
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-password}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-adm@example.coop}
+      - XDEBUG_CONFIG=${XDEBUG_CONFIG:-client_host=172.17.0.1 client_port=9003 start_with_request=yes}
+      - TZ=${TZ:-America/Sao_Paulo}
       - MAILER_URL
       - MAILER_FROM
-      - TZ
   nginx:
     build:
       context: .docker/nginx
     restart: unless-stopped
     volumes:
-      - ./volumes/app:/app:ro
+      - ./volumes/php:/var/www/html:ro
     ports:
       - 80:80
   mysql:
     image: mariadb
+    restart: unless-stopped
     ports:
       - 3306:3306
     volumes:
       - ./volumes/mysql/dump:/docker-entrypoint-initdb.d
       - ./volumes/mysql/data:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD
-      - MYSQL_DATABASE
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-kimai}
