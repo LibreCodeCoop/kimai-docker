@@ -16,10 +16,8 @@ RUN chmod uga+x /usr/local/bin/install-php-extensions && sync \
     gd \
     intl \
     mysqli \
-#     pdo \
+    pdo \
     pdo_mysql \
-#     pgsql \
-#     sockets \
     xdebug \
     xsl \
     zip \
