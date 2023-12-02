@@ -1,4 +1,4 @@
-# Kimai development
+# Kimai Docker
 
 [Kimai](https://github.com/kimai/kimai) runing in a container
 
