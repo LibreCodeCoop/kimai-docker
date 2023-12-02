@@ -1,39 +1,44 @@
 services:
-  php:
+  kimai:
     build:
       context: .docker/php
-    restart: unless-stopped
-    volumes:
-      - ./.docker/php/wait-for-db.php:/var/www/scripts/wait-for-db.php
-      - ./volumes/php:/var/www/html
-      - ~/.composer:/root/.composer/
     environment:
-      - HOST_UID=${HOST_UID:-1000}
-      - HOST_GID=${HOST_GID:-1000}
+      - USER_ID=${USER_ID:-1000}
+      - GROUP_ID=${GROUP_ID:-1000}
+      - ADMINMAIL=${ADMINMAIL:-kimai@example.com}
+      - ADMINPASS=${ADMINPASS:-password}
       - DB_ADAPTER=${DB_ADAPTER:-mysql}
       - DB_NAME=${DB_NAME:-kimai}
       - DB_HOST=${DB_HOST:-mysql}
+      - DB_PORT=${DB_PORT:-3306}
       - DB_USER=${DB_USER:-root}
       - DB_PASSWD=${DB_PASSWD:-root}
-      - DATABASE_URL=${DATABASE_URL:-mysql://root:root@mysql:3306/kimai}
-      - VERSION=${VERSION:-main}
-      - REPOSITORY=${REPOSITORY:-https://github.com/kimai/kimai}
-      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-      # Minimum length: 8
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-password}
-      - ADMIN_EMAIL=${ADMIN_EMAIL:-adm@example.coop}
-      - XDEBUG_CONFIG=${XDEBUG_CONFIG:-client_host=172.17.0.1 client_port=9003 start_with_request=yes}
+      - DATABASE_URL=${DATABASE_URL:-${DB_ADAPTER:-mysql}://${DB_USER:-root}:${DB_PASSWD:-root}@${DB_HOST:-mysql}:${DB_PORT:-3306}/${DB_NAME:-kimai}}
+      - TRUSTED_HOSTS=${TRUSTED_HOSTS:-nginx,localhost,127.0.0.1}
+      - MAILER_URL=${MAILER_URL:-smtp://mailer:1025}
+      - MAILER_FROM=${MAILER_FROM:-kimai@example.com}
+      - XDEBUG_CONFIG=${XDEBUG_CONFIG:-client_host=172.17.0.1 client_port=9004 start_with_request=yes}
       - TZ=${TZ:-America/Sao_Paulo}
-      - MAILER_URL
-      - MAILER_FROM
+    volumes:
+      - ~/.composer:/root/.composer/
+      - ./volumes/php:/opt/kimai
+      - ./volumes/php/var:/opt/kimai/var
+    restart: unless-stopped
   nginx:
-    build:
-      context: .docker/nginx
+    image: tobybatch/nginx-fpm-reverse-proxy
     restart: unless-stopped
     volumes:
-      - ./volumes/php:/var/www/html:ro
+      - ./volumes/php/public:/opt/kimai/public:ro
     ports:
       - 80:80
+    depends_on:
+      - kimai
+    healthcheck:
+      test:  wget --spider http://nginx/health || exit 1
+      interval: 20s
+      start_period: 10s
+      timeout: 10s
+      retries: 3
   mysql:
     image: mariadb
     restart: unless-stopped
@@ -45,3 +50,9 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-kimai}
+    healthcheck:
+      test: mysqladmin -p$$MYSQL_ROOT_PASSWORD ping -h localhost
+      interval: 20s
+      start_period: 10s
+      timeout: 10s
+      retries: 3

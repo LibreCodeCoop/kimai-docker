@@ -1,32 +1,18 @@
-FROM php:8.2-fpm
+FROM kimai/kimai2:fpm-${VERSION:-2.5.0-prod}
 
-RUN apt-get update
-
-RUN apt-get install -y \
-    git \
-    libzip-dev \
-    procps \
-    rsync \
-    unzip
+RUN  apk add --no-cache \
+    rsync
 
 # Install PHP extensions
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN chmod uga+x /usr/local/bin/install-php-extensions && sync \
-    && install-php-extensions \
-    gd \
-    intl \
-    mysqli \
-    pdo \
-    pdo_mysql \
-    xdebug \
-    xsl \
-    zip \
-    @composer \
-    && rm /usr/local/bin/install-php-extensions
+RUN chmod uga+x /usr/local/bin/install-php-extensions &&\
+    install-php-extensions \
+    xdebug
 
-COPY config/php.ini /usr/local/etc/php/conf.d/
+COPY config/php.ini /usr/local/etc/php/conf.d/docker-php-kimai.ini
 
-WORKDIR /var/www/html
+WORKDIR /opt/kimai
 
+RUN mv /opt/kimai /opt/kimai-tmp
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT [ "sh", "/usr/local/bin/entrypoint.sh" ]
