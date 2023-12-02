@@ -1,18 +1,32 @@
 #!/bin/bash
 
-# Set uid of host machine
-usermod --non-unique --uid "${HOST_UID}" www-data
-groupmod --non-unique --gid "${HOST_GID}" www-data
-
-php /var/www/scripts/wait-for-db.php
 if [ ! -d ".git" ]; then
-    git clone --progress --single-branch --depth 1 --branch "${VERSION}" --recurse-submodules -j 4 $REPOSITORY /tmp/app
-    rsync -r /tmp/app/ .
-    composer install
-    bin/console kimai:install -n
-    bin/console kimai:user:create $ADMIN_USERNAME $ADMIN_EMAIL ROLE_SUPER_ADMIN $ADMIN_PASSWORD
-    chown -R www-data:www-data .
-    chmod -R g+r .
-    chmod -R g+rw var/
+    rsync -r /opt/kimai-tmp/ /opt/kimai
+    chown -R $USER_ID:$GROUP_ID /opt/kimai
 fi
-php-fpm
+
+sed -i -e "s/^exec \/service.sh$/echo \"End of startup.sh\"/" /startup.sh
+sed -i -e "s/www-kimai/www-data/" /startup.sh
+
+sed -i -e "s/^runServer$/\n# runServer\n/" /service.sh
+
+/bin/bash /startup.sh
+echo "🟡 startup.sh finished"
+/bin/bash /service.sh
+
+function runServer() {
+  # Just while I'm fixing things
+  /opt/kimai/bin/console kimai:reload --env="$APP_ENV"
+  chown -R $USER_ID:$GROUP_ID /opt/kimai
+  if [ -e /use_apache ]; then
+    echo "🏁 Running 🪶 apache server"
+    exec /usr/sbin/apache2 -D FOREGROUND
+  elif [ -e /use_fpm ]; then
+    echo "🏁 Running 🐘 php-fpm server"
+    exec php-fpm
+  else
+    echo "⚠️ Error, unknown server type"
+  fi
+}
+
+runServer
