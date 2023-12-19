@@ -1,4 +1,6 @@
-FROM kimai/kimai2:fpm-${VERSION:-2.5.0-prod}
+ARG VERSION
+
+FROM kimai/kimai2:fpm-${VERSION}
 
 RUN  apk add --no-cache \
     rsync

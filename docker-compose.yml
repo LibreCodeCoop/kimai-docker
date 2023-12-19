@@ -2,6 +2,9 @@ services:
   kimai:
     build:
       context: .docker/php
+      args:
+        VERSION: ${VERSION:-2.6.0-prod}
+
     environment:
       - USER_ID=${USER_ID:-1000}
       - GROUP_ID=${GROUP_ID:-1000}
