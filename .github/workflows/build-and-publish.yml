@@ -14,6 +14,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME_PHP: ${{ github.repository }}
+  VERSION: 2.6.0-prod
 
 jobs:
   build-and-push:
@@ -54,6 +55,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .docker/php
+          build-args: |
+            VERSION=${{ env.VERSION }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta-php.outputs.tags }}
           labels: ${{ steps.meta-php.outputs.labels }}

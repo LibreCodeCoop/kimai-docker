@@ -1,4 +1,4 @@
-ARG VERSION
+ARG VERSION=2.6.0-prod
 
 FROM kimai/kimai2:fpm-${VERSION}
 
